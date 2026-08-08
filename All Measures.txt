@@ -1,0 +1,45 @@
+Avg. rating = AVERAGE(fact_bookings[ratings_given])
+
+avg.rating LM = CALCULATE([Avg. rating],DATEADD(dim_date[date],-1,MONTH))
+
+avg.rating mod = IF(ISBLANK([Avg. rating]), 0, [Avg. rating])
+
+Cancellation rate = DIVIDE([Total cancelled bookings],[Total bookings],0)
+
+cancellation rate LM = CALCULATE([CR], DATEADD(dim_date[date], -1, MONTH))
+
+chg % = DIVIDE([revenue], [revenue LM],0)
+
+CR = SWITCH(TRUE(),
+ISBLANK(SELECTEDVALUE(fact_bookings[booking_status])),[Cancellation rate],
+SELECTEDVALUE(fact_bookings[booking_status])="Cancelled", [Cancellation rate],
+SELECTEDVALUE(fact_bookings[booking_status])="No Show", "NA",
+SELECTEDVALUE(fact_bookings[booking_status])="Checked out", "NA")
+
+LDC = [revenue BR] - [revenue]
+
+LDC LM = CALCULATE([LDC], DATEADD(dim_date[date], -1, MONTH))
+
+max.rating = 5
+
+min.rating = 0
+
+Occupancy % = DIVIDE([Total sucessful bookings],[Total capacity],0)
+
+Occupancy % LM = CALCULATE([Occupancy %],DATEADD(dim_date[date],-1,MONTH))
+
+revenue = SUM(fact_bookings[revenue_realized])
+
+revenue BR = SUM(fact_bookings[revenue_generated])
+
+revenue LM = CALCULATE([revenue],DATEADD(dim_date[date],-1,MONTH))
+
+slect = SELECTEDVALUE(fact_bookings[booking_status])
+
+Total bookings = COUNT(fact_bookings[booking_id])
+
+Total cancelled bookings = CALCULATE([Total bookings], fact_bookings[booking_status]="Cancelled", fact_bookings[booking_status]<>"No Show")
+
+Total capacity = SUM(fact_aggregated_bookings[capacity])
+
+Total sucessful bookings = SUM(fact_aggregated_bookings[successful_bookings])
